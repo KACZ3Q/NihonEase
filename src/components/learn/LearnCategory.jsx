@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { getLearnItemsByCategory } from '@/data/services/learn';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,8 +20,9 @@ const LearnCategory = () => {
   const { user, setUser } = useUser();
   const router = useRouter();
   const { id: categoryId } = useParams();
-  const searchParams = useSearchParams();
-  const direction = searchParams.get('direction') || 'plToJp';
+
+  // Pobierz parametry URL ręcznie po stronie klienta
+  const direction = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('direction') || 'plToJp' : 'plToJp';
 
   useEffect(() => {
     const fetchItems = async () => {
