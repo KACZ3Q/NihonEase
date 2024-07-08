@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { getLearnItemsByCategory } from '@/data/services/learn';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ const LearnCategory = () => {
   const { user, setUser } = useUser();
   const router = useRouter();
   const { id: categoryId } = useParams();
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = useSearchParams();
   const direction = searchParams.get('direction') || 'plToJp';
 
   useEffect(() => {
