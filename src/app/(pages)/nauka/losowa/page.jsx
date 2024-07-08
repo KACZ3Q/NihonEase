@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { getRandomLearnItems } from '@/data/services/learn';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,11 @@ const LearnRandom = () => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [answers, setAnswers] = useState([]);
-  const searchParams = useSearchParams();
+  const router = useRouter();
   const amount = 5;
+  const searchParams = new URLSearchParams(window.location.search);
   const direction = searchParams.get('direction') || 'plToJp';
   const { user, setUser } = useUser();
-  const router = useRouter();
 
   useEffect(() => {
     const fetchItems = async () => {
