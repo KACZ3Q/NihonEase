@@ -1,14 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { getLearnItemsByCategory } from '@/data/services/learn';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useUser } from '@/context/usercontext';
 import Link from 'next/link';
-
-const MAX_CATEGORIES = 8; // Maksymalna liczba kategorii
 
 const LearnCategory = () => {
   const [items, setItems] = useState([]);
@@ -18,6 +17,7 @@ const LearnCategory = () => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const { user, setUser } = useUser();
   const router = useRouter();
   const { id: categoryId } = useParams();
   const searchParams = useSearchParams();
@@ -53,7 +53,6 @@ const LearnCategory = () => {
     if (isCorrect) setCorrectAnswers(correctAnswers + 1);
     else setIncorrectAnswers(incorrectAnswers + 1);
 
-    // Delay before showing next word
     setTimeout(() => {
       const nextIndex = items.indexOf(currentItem) + 1;
       if (nextIndex < items.length) {
@@ -86,8 +85,10 @@ const LearnCategory = () => {
           <p>Poprawne odpowiedzi: {correctAnswers}</p>
           <p>Niepoprawne odpowiedzi: {incorrectAnswers}</p>
           <div className='space-x-2 space-y-2'>
-            <Button onClick={() => router.push('/profil')}>Powrót do profilu</Button>
-            {parseInt(categoryId, 10) < MAX_CATEGORIES && (
+            <Link href='/profil'>
+              <Button>Powrót do profilu</Button>
+            </Link>
+            {parseInt(categoryId, 10) < 8 && (
               <Link href={`/nauka/kategorie/${parseInt(categoryId, 10) + 1}?direction=${direction}`}>
                 <Button>Przejdź do kolejnej kategorii</Button>
               </Link>
@@ -98,9 +99,7 @@ const LearnCategory = () => {
         <>
           <Card className="w-full max-w-2xl mb-4 p-4">
             {direction === 'jpToPl' ? (
-              <>
-                <h2 className="text-4xl font-bold">{Array.isArray(currentItem.japaneseWord) ? currentItem.japaneseWord.join(', ') : currentItem.japaneseWord}</h2>
-              </>
+              <h2 className="text-4xl font-bold">{Array.isArray(currentItem.japaneseWord) ? currentItem.japaneseWord.join(', ') : currentItem.japaneseWord}</h2>
             ) : (
               <h2 className="text-4xl font-bold">{currentItem.polishWord}</h2>
             )}
@@ -114,8 +113,8 @@ const LearnCategory = () => {
                 onChange={(e) => setUserAnswer(e.target.value)} 
               />
               <Button type="submit" className="mt-4">Dalej</Button>
-              {feedback && <p className="mt-4">{feedback}</p>}
             </form>
+            {feedback && <p className="mt-4">{feedback}</p>}
           </Card>
         </>
       )}
@@ -123,4 +122,10 @@ const LearnCategory = () => {
   );
 };
 
-export default LearnCategory;
+export default function LearnCategoryPage() {
+  return (
+    <Suspense fallback={<div>Ładowanie...</div>}>
+      <LearnCategory />
+    </Suspense>
+  );
+}
