@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export function middleware(request) {
-  const token = request.cookies.get('jwt')?.value;
+  const token = cookies().get('jwt')?.value;
 
-  if (token) {
-    return NextResponse.redirect(new URL('/profil', request.url));
+  if (!token) {
+    return NextResponse.redirect(new URL('/logowanie', request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/'], 
+  matcher: ['/profil', '/nauka/:path*'],
 };
