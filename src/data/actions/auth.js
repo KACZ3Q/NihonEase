@@ -7,7 +7,7 @@ import { registerUserService, loginUserService } from "../services/auth";
 const config = {
   maxAge: 60 * 60 * 24 * 7, // 1 tydzień
   path: "/",
-  domain: process.env.HOST ?? "localhost",
+  domain: "nihon-ease.vercel.app" ?? "localhost",
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
 };
