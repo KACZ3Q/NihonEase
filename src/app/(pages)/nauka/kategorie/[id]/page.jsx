@@ -122,10 +122,10 @@ const LearnCategory = () => {
   );
 };
 
-export default function LearnCategoryPage() {
-  return (
-    <Suspense fallback={<div>Ładowanie...</div>}>
-      <LearnCategory />
-    </Suspense>
-  );
-}
+const LearnCategoryPage = () => (
+  <Suspense fallback={<div>Ładowanie...</div>}>
+    <LearnCategory />
+  </Suspense>
+);
+
+export default LearnCategoryPage;

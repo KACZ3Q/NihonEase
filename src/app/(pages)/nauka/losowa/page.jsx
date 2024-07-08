@@ -125,10 +125,10 @@ const LearnRandom = () => {
   );
 };
 
-export default function LearnRandomPage() {
-  return (
-    <Suspense fallback={<div>Ładowanie...</div>}>
-      <LearnRandom />
-    </Suspense>
-  );
-}
+const LearnRandomPage = () => (
+  <Suspense fallback={<div>Ładowanie...</div>}>
+    <LearnRandom />
+  </Suspense>
+);
+
+export default LearnRandomPage;
