@@ -45,7 +45,7 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <p>{user.username}</p>
         </div>
-        <div className='text-3xl'>
+        <div>
           <Link href='/profil'>
           <b>
             NihonEase

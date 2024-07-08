@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useUser } from '@/context/usercontext';
+import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/ui/table';
+import Link from 'next/link';
 
 const LearnRandom = () => {
   const [items, setItems] = useState([]);
@@ -16,6 +18,7 @@ const LearnRandom = () => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const amount = 5;
   const searchParams = new URLSearchParams(window.location.search);
@@ -39,15 +42,17 @@ const LearnRandom = () => {
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (!currentItem) return;
+    if (!currentItem || isSubmitting) return;
+    setIsSubmitting(true);
     if (!userAnswer.trim()) {
       setFeedback('Proszę wpisać odpowiedź');
+      setIsSubmitting(false);
       return;
     }
     const isCorrect = checkAnswer(userAnswer, currentItem);
     setFeedback(isCorrect ? 'Poprawnie!' : 'Niepoprawnie');
 
-    setAnswers([...answers, { id: currentItem.wordID, answer: userAnswer }]);
+    setAnswers([...answers, { id: currentItem.wordID, question: getQuestion(currentItem), answer: userAnswer, correctAnswer: getCorrectAnswer(currentItem), isCorrect }]);
 
     if (isCorrect) setCorrectAnswers(correctAnswers + 1);
     else setIncorrectAnswers(incorrectAnswers + 1);
@@ -58,8 +63,10 @@ const LearnRandom = () => {
         setCurrentItem(items[nextIndex]);
         setUserAnswer('');
         setFeedback('');
+        setIsSubmitting(false);
       } else {
         setFeedback('Zakończyłeś ćwiczenia!');
+        setIsSubmitting(false);
       }
     }, 1000);
   };
@@ -71,6 +78,22 @@ const LearnRandom = () => {
       const correctAnswers = Array.isArray(item.romaji) ? item.romaji : [item.romaji];
       const possibleAnswers = correctAnswers.concat(Array.isArray(item.japaneseWord) ? item.japaneseWord : [item.japaneseWord]);
       return possibleAnswers.includes(answer.trim().toLowerCase());
+    }
+  };
+
+  const getCorrectAnswer = (item) => {
+    if (direction === 'jpToPl') {
+      return item.polishWord;
+    } else {
+      return Array.isArray(item.romaji) ? item.romaji.join(', ') : item.romaji;
+    }
+  };
+
+  const getQuestion = (item) => {
+    if (direction === 'jpToPl') {
+      return Array.isArray(item.japaneseWord) ? item.japaneseWord.join(', ') : item.japaneseWord;
+    } else {
+      return item.polishWord;
     }
   };
 
@@ -94,8 +117,33 @@ const LearnRandom = () => {
           <h2 className="text-xl font-bold">Podsumowanie</h2>
           <p>Poprawne odpowiedzi: {correctAnswers}</p>
           <p>Niepoprawne odpowiedzi: {incorrectAnswers}</p>
-          <div className='space-x-2 space-y-2'>
-            <Button onClick={handleRetry}>Losuj kolejne słówka</Button>
+          <Table className="w-full mt-4">
+            <TableHeader>
+              <TableRow>
+                <TableCell>Pytanie</TableCell>
+                <TableCell>Twoja odpowiedź</TableCell>
+                <TableCell>Poprawna odpowiedź</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {answers.map((answer, index) => (
+                <TableRow key={index}>
+                  <TableCell>{answer.question}</TableCell>
+                  <TableCell className={answer.isCorrect ? 'text-green-500' : 'text-red-500'}>{answer.answer}</TableCell>
+                  <TableCell>{answer.correctAnswer}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div className='m-2'>
+          <div className="mb-2">
+              <Link href='/profil'>
+                <Button className="w-full">Powrót do profilu</Button>
+              </Link>
+            </div>
+            <div className="mb-2">
+              <Button className="w-full" onClick={handleRetry}>Losuj kolejne słówka</Button>
+            </div>
           </div>
         </Card>
       ) : (
@@ -114,8 +162,9 @@ const LearnRandom = () => {
                 placeholder={direction === 'jpToPl' ? 'Twoja odpowiedź po polsku' : 'Twoja odpowiedź w romaji'} 
                 value={userAnswer} 
                 onChange={(e) => setUserAnswer(e.target.value)} 
+                disabled={isSubmitting}
               />
-              <Button type="submit" className="mt-4">Dalej</Button>
+              <Button type="submit" className="mt-4 w-full" disabled={isSubmitting}>Dalej</Button>
             </form>
             {feedback && <p className="mt-4">{feedback}</p>}
           </Card>
